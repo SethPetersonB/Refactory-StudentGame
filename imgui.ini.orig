@@ -1,0 +1,29 @@
+[Debug]
+Pos=13,54
+Size=149,159
+Collapsed=0
+
+[Framerate]
+Pos=219,16
+Size=104,51
+Collapsed=0
+
+[Grid]
+Pos=7,256
+Size=356,315
+Collapsed=0
+
+[Stage Debug]
+<<<<<<< HEAD
+Pos=399,23
+=======
+Pos=475,19
+>>>>>>> 9f9731284303e431bfaccd04f6c6de31db20da3a
+Size=280,112
+Collapsed=0
+
+[Structure Debug]
+Pos=386,95
+Size=302,271
+Collapsed=0
+

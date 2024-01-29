@@ -1,0 +1,82 @@
+{
+  "TestStage1" : {
+    "objects": [
+      "PlayerController",
+      "Background",
+      "HealthUIBG",
+      "HealthUI",
+      "ResourceUIBG",
+      "ResourceUI",
+      "ProgressUIBG",
+      "ProgressUI",
+      "WaveText",
+      "WaveCount",
+      "WaveController",
+      "SpaceBegin",
+      "Tutorial_W",
+      "Tutorial_S",
+      "Tutorial_A",
+      "Tutorial_D",
+      "Tutorial_Q",
+      "Tutorial_E",
+      "ShockTutorialHUD",
+      "ShootTutorialHUD",
+      "SlowTutorialHUD",
+      "ShieldTutorialHUD"
+    ],
+
+    "index": [ "6" ],
+    "waves": "Waves/L1Waves.json"
+  },
+  
+  "QuitStage" : {
+    "objects" : ["SplashBG", "Quitconfirmation", "HorizontalMenu", "Yesbutton", "Nobutton"],
+    "index" : ["2"]
+  },
+  
+  "TestMenu1" : {
+    "objects" : ["BGFade", "PauseIcon", "VerticalMenu", "Resumegame", "Quitgame", "Howtoplaybutton", "ResetButton", "ReturnButton", "OptionsButton", "CreditsButton"],
+    "index" : ["3"]
+  },
+  
+  "LoseScreen" : {
+    "objects" : ["BGFade", "LoseText", "HorizontalMenu", "ResetButton"],
+    "index" : ["0"]
+  },
+  
+  "WinStage" : {
+    "objects" : ["BGFade", "WinText", "HorizontalMenu", "ResetButton"],
+    "index" : ["1"]
+  },
+
+  "HowToPlay": {
+    "objects": [ "BGFade", "Howtoplay" ],
+    "index": [ "4" ]
+  },
+
+   "Options": {
+    "objects": [ "SplashBG", "OptionScreen", "VerticalMenu", "ReturnButton", "FullScreenButton", "AudioButton", "MusicButton" ],
+    "index": [ "7" ]
+  },
+
+  "Credits": {
+    "objects": [ "SplashBG", "CreditScreen", "HorizontalMenu", "ReturnButton"],
+    "index": [ "8" ]
+  },
+
+  "MainMenu": {
+    "objects": [ "TitleScreen", "TitleLogo", "BGFade", "HorizontalMenu", "StartButton", "Quitgame" ],
+    "index": [ "9" ]
+  },
+
+  "MenuConfirmation": {
+    "objects": ["BGFade", "MenuConfirmation", "HorizontalMenu", "Yesbutton", "Nobutton" ],
+    "index": [ "10" ]
+  },
+
+  "ResetConfirmation": {
+    "objects": [ "BGFade", "Yesbutton", "Nobutton", "Restartconfirmation" ],
+    "index":  [ "11" ]
+  }
+
+}

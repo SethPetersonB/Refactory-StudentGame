@@ -1,0 +1,60 @@
+{
+  "Box0":
+    {
+      "components" : ["Transform", "Physics", "Collider", "Sprite"], // List which components an object has
+
+      // Initial values for component
+      "component.Transform" : 
+        {
+          "x" : -0.8,
+          "y" : 0.2,
+          "rotation" : 0
+        },
+
+      "component.Sprite" : 
+        {
+          "x" : 0,
+          "y" : 0,
+          "r" : 255,
+          "g" : 0,
+          "b" : 255,
+          "a" : 255,
+          "width" : 0.2,
+          "height" : 0.2
+        },
+       
+       "component.Collider" : 
+        {
+          "Blah" : 0
+        }
+    },
+
+  "Box1":
+    {
+      "components" : ["Transform", "Physics", "Collider", "Sprite"],
+
+      "component.Transform" : 
+        {
+          "x" : 0.6,
+          "y" : 0,
+          "rotation" : 0
+        },
+
+      "component.Sprite" : 
+        {
+          "x" : 0,
+          "y" : 0,
+          "r" : 0,
+          "g" : 255,
+          "b" : 255,
+          "a" : 255,
+          "width" : 0.3,
+          "height" : 0.4
+        },
+       
+       "component.Collider" : 
+        {
+          "Blah" : 0
+        }
+    }
+}

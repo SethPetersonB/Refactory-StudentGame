@@ -1,0 +1,246 @@
+{
+  // Folder
+  "art_assets/": {
+    // Texture Name
+    // Texture path
+    // # of frames
+
+    "DEFAULT": {
+      "path": "DefTexture.png"
+    },
+    // Alias for the texture
+    "Block": {
+      // Path to the texture in the containing folder
+      "path": "BlockSheet.png",
+      "frames": 4
+    },
+
+    //"Progress": {
+    //"path": "green.png"
+    //},
+
+    "Tile": {
+      "path": "Outline.png"
+    },
+
+    //"Test": {
+    //"path": "TestAnim.png",
+    //"frames": 4
+    //},
+
+    //"Tower": {
+    //  "path": "Tower1_top.png"
+    //},
+
+    "Background": {
+      "path": "Clouds.png"
+    },
+
+    "Enemy1": {
+      "path": "Enemy.png"
+    },
+
+    "Fireball": {
+      "path": "Fire.png"
+    },
+
+    "Pause": {
+      "path": "PauseFrames.png",
+      "frames": 5
+    },
+
+    "YesButton": {
+      "path": "Yes.png",
+      "frames": 2
+    },
+
+    "HowToPlayButton": {
+      "path": "Howtoplaybutton.png",
+      "frames": 2
+    },
+
+    "NoButton": {
+      "path": "No.png",
+      "frames": 2
+    },
+
+    "HowToPlay": {
+      "path": "Howtoplay.png"
+    },
+
+    //"DigipenSplash": {
+    //  "path": "DigiPenLogo.png"
+    //},
+
+    "QuitConfirm": {
+      "path": "QuitConfirmation.png"
+    },
+
+    "MenuConfirm": {
+      "path": "MenuConfirmation.png"
+    },
+
+    "ResumeButton": {
+      "path": "Resumegame.png",
+      "frames": 2
+    },
+
+    "QuitButton": {
+      "path": "Quitgame.png",
+      "frames": 2
+    },
+
+    "FullScreenButton": {
+      "path": "Fullscreen.png",
+      "frames": 2
+    },
+
+    "AudioButton": {
+      "path": "Audio.png",
+      "frames": 2
+    },
+
+    "MusicButton": {
+      "path": "Music.png",
+      "frames": 2
+    },
+
+    "Fade": {
+      "path": "LightFade.png"
+    },
+
+    "SolidBG": {
+      "path": "DarkGrey.png"
+    },
+
+    "Resources": {
+      "path": "trinary.png",
+      "frames": 17
+    },
+
+    "ResetButton": {
+      "path": "ResetButton.png",
+      "frames": 2
+    },
+
+    "LoseText": {
+      "path": "LoseScreen.png"
+    },
+
+    "WaveText": {
+      "path": "WaveText.png"
+    },
+
+    "WaveCount": {
+      "path": "WaveCounter.png",
+      "frames": 4
+    },
+
+    "WinText": {
+      "path": "WinScreen.png"
+    },
+
+    "Begin": {
+      "path": "Begin.png"
+    },
+
+    "Title": {
+      "path": "Clouds.png"
+    },
+
+    "CreditScreen": {
+      "path": "CreditScreen.png"
+    },
+
+    "OptionScreen": {
+      "path": "OptionScreen.png"
+    },
+
+    "StartButton": {
+      "path": "StartGame.png",
+      "frames": 2
+    },
+
+    "OptionsButton": {
+      "path": "Options.png",
+      "frames": 2
+    },
+
+    "CreditsButton": {
+      "path": "Credits.png",
+      "frames": 2
+    },
+
+    "ReturnButton": {
+      "path": "Return.png",
+      "frames": 2
+    },
+    /*
+    "Keys": {
+      "path": "Keys.png",
+      "frames": 6
+    },
+    */
+    "KeyW": {
+      "path": "TutorialW.png"
+    },
+
+    "KeyA": {
+      "path": "TutorialA.png"
+    },
+
+    "KeyS": {
+      "path": "TutorialS.png"
+    },
+    "KeyD": {
+      "path": "TutorialD.png"
+    },
+
+    "KeyQ": {
+      "path": "TutorialQ.png"
+    },
+
+    "KeyE": {
+      "path": "TutorialE.png"
+    },
+    
+    "Indicator": {
+      "path": "Indicator.png"
+    },
+    "Circle": {
+      "path": "Circle.png"
+    },
+
+    "ShockWave": {
+      "path": "ShockWave.png"
+    },
+
+    "RestartConfirm": {
+      "path": "RestartConfirmation.png"
+    },
+
+    "ShootTutorial": {
+      "path": "ShootText.png"
+    },
+
+    "ShockTutorial": {
+      "path": "ShockText.png"
+    },
+
+    "ShieldTutorial": {
+      "path": "ShieldText.png"
+    },
+
+    "SlowTutorial": {
+      "path": "SlowText.png"
+    },
+
+    "TitleLogo": {
+<<<<<<< HEAD
+      "path": "TitleLogo.png"
+=======
+      "path":  "TitleLogo.png"
+>>>>>>> 2b856cc7e4ea8bf3e1e46712a0b71202a2beb6dd
+    }
+  }
+}

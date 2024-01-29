@@ -1,0 +1,279 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\0\GL\glew.h" />
+    <ClInclude Include="imgui\imconfig.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="include\Animator.h" />
+    <ClInclude Include="include\audio_startup.h" />
+    <ClInclude Include="include\audio_test.h" />
+    <ClInclude Include="include\BuildLogic.h" />
+    <ClInclude Include="include\ButtonMenu.h" />
+    <ClInclude Include="include\camera.h" />
+    <ClInclude Include="include\ClickDetector.h" />
+    <ClInclude Include="include\Controller.h" />
+    <ClInclude Include="include\display.h" />
+    <ClInclude Include="include\DrawElement.h" />
+    <ClInclude Include="include\DrawGroup.h" />
+    <ClInclude Include="include\DrawSystem.h" />
+    <ClInclude Include="include\DrawToken.h" />
+    <ClInclude Include="include\DrawUtils.h" />
+    <ClInclude Include="include\Draw_fwd.h" />
+    <ClInclude Include="include\EnemyCombat.h" />
+    <ClInclude Include="include\EnemyLogic.h" />
+    <ClInclude Include="include\EnemyPathing.h" />
+    <ClInclude Include="include\GameInstance.h" />
+    <ClInclude Include="include\GraphicsPipeline.h" />
+    <ClInclude Include="include\grid.h" />
+    <ClInclude Include="include\GSM.h" />
+    <ClInclude Include="include\imgui_impl.h" />
+    <ClInclude Include="include\imgui_wrapper.h" />
+    <ClInclude Include="include\Input.h" />
+    <ClInclude Include="include\json\json.h" />
+    <ClInclude Include="include\Levels.h" />
+    <ClInclude Include="include\Logger.h" />
+    <ClInclude Include="include\MenuButtons.h" />
+    <ClInclude Include="include\Renderer.h" />
+    <ClInclude Include="include\RMesh.h" />
+    <ClInclude Include="include\Script.h" />
+    <ClInclude Include="include\ScriptObjectLoader.h" />
+    <ClInclude Include="include\ScriptSignal.h" />
+    <ClInclude Include="include\Stage.h" />
+    <ClInclude Include="include\StageInit.h" />
+    <ClInclude Include="include\Mesh.h" />
+    <ClInclude Include="include\Messages.h" />
+    <ClInclude Include="include\object_stats.h" />
+    <ClInclude Include="include\ParsedObjects.h" />
+    <ClInclude Include="include\Particles.h" />
+    <ClInclude Include="include\Physics.h" />
+    <ClInclude Include="include\shader.h" />
+    <ClInclude Include="include\sprite.h" />
+    <ClInclude Include="include\StructureLogic.h" />
+    <ClInclude Include="include\structures.h" />
+    <ClInclude Include="include\Texture.h" />
+    <ClInclude Include="include\Timer.h" />
+    <ClInclude Include="include\Transform.h" />
+    <ClInclude Include="include\UIFrame.h" />
+    <ClInclude Include="include\Waves.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_demo.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="source\Animator.cpp" />
+    <ClCompile Include="source\audio_startup.cpp" />
+    <ClCompile Include="source\audio_test.cpp" />
+    <ClCompile Include="source\BuildLogic.cpp" />
+    <ClCompile Include="source\ButtonMenu.cpp" />
+    <ClCompile Include="source\camera.cpp" />
+    <ClCompile Include="source\ClickDetector.cpp" />
+    <ClCompile Include="source\Component.cpp" />
+    <ClCompile Include="source\Controller.cpp" />
+    <ClCompile Include="source\display.cpp" />
+    <ClCompile Include="source\DrawElement.cpp" />
+    <ClCompile Include="source\DrawGroup.cpp" />
+    <ClCompile Include="source\DrawSystem.cpp" />
+    <ClCompile Include="source\DrawToken.cpp" />
+    <ClCompile Include="source\DrawUtils.cpp" />
+    <ClCompile Include="source\EnemyCombat.cpp" />
+    <ClCompile Include="source\EnemyLogic.cpp" />
+    <ClCompile Include="source\EnemyPathing.cpp" />
+    <ClCompile Include="source\Event_Connection.cpp" />
+    <ClCompile Include="source\GameInstance.cpp" />
+    <ClCompile Include="source\grid.cpp" />
+    <ClCompile Include="source\GSM.cpp" />
+    <ClCompile Include="source\imgui_impl.cpp" />
+    <ClCompile Include="source\imgui_wrapper.cpp" />
+    <ClCompile Include="source\Input.cpp" />
+    <ClCompile Include="source\jsoncpp.cpp" />
+    <ClCompile Include="source\Levels.cpp" />
+    <ClCompile Include="source\MenuButtons.cpp" />
+    <ClCompile Include="source\Renderer.cpp" />
+    <ClCompile Include="source\RMesh.cpp" />
+    <ClCompile Include="source\Script.cpp" />
+    <ClCompile Include="source\ScriptSignal.cpp" />
+    <ClCompile Include="source\StageInit.cpp" />
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\Mesh.cpp" />
+    <ClCompile Include="source\Messages.cpp" />
+    <ClCompile Include="source\object_stats.cpp" />
+    <ClCompile Include="source\ParsedObjects.cpp" />
+    <ClCompile Include="source\ParsedObjects_templates.cpp" />
+    <ClCompile Include="source\Particles.cpp" />
+    <ClCompile Include="source\Physics.cpp" />
+    <ClCompile Include="source\shader.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\0\boost_1_63_0\boost_1_63_0\include\boost-1_63;C:\0\lua-5.1.5_Win32_dll14_lib\include;C:\0\luabind-0.9.1;F:\DigiPen\2016-17\GAM200\net_result\include;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include\GL;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="source\sprite.cpp" />
+    <ClCompile Include="source\Stages.cpp" />
+    <ClCompile Include="source\Structure.cpp" />
+    <ClCompile Include="source\StructureBase.cpp" />
+    <ClCompile Include="source\StructureLogic.cpp" />
+    <ClCompile Include="source\Texture.cpp" />
+    <ClCompile Include="source\TextureLoader.cpp" />
+    <ClCompile Include="source\Tile.cpp" />
+    <ClCompile Include="source\Timer.cpp" />
+    <ClCompile Include="source\Transform.cpp" />
+    <ClCompile Include="source\UIFrame.cpp" />
+    <ClCompile Include="source\WaveLoader.cpp" />
+    <ClCompile Include="source\Waves.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Objects\Levels.json" />
+    <None Include="Objects\Objects.json" />
+    <None Include="Objects\Textures.json" />
+    <None Include="res\basicShader.fs" />
+    <None Include="res\basicShader.vs" />
+    <None Include="scripts\AnimatePause.lua" />
+    <None Include="scripts\components\Animator.lua" />
+    <None Include="scripts\components\Controller.lua" />
+    <None Include="scripts\components\ParticleEmitter.lua" />
+    <None Include="scripts\components\Transform.lua" />
+    <None Include="scripts\environment.lua" />
+    <None Include="scripts\functional.lua" />
+    <None Include="scripts\sandbox.lua" />
+    <None Include="scripts\structures\Shock.lua" />
+    <None Include="scripts\structures\Slow.lua" />
+    <None Include="scripts\structures\Tower.lua" />
+    <None Include="scripts\testEnv.lua" />
+    <None Include="scripts\TransformOverride.lua" />
+    <None Include="scripts\testEnv2.lua" />
+    <None Include="scripts\testModule.lua" />
+    <None Include="Waves\L1Waves.json" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E5606442-C11C-4F77-BFD5-0BAADE418317}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>Refactory</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\net_result\include;C:\0;C:\0\boost_1_63_0\boost_1_63_0;C:\0\lua-5.1.5_Win32_dll14_lib\include;C:\0\luabind-0.9.1;C:\0\GL;C:\0\SDL2;D:\Documents\Code\boost\boost_1_63_0\include\boost-1_63;D:\Documents\Code\lua\lua-5.1.5_Win32_dll14_lib\include;D:\Documents\Code\luabind\luabind-0.9.1;.\imgui;.\include;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include\GL;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>C:\net_result\libs;C:\0\luabind-0.9.1\stage;C:\0\lua-5.1.5_Win32_dll14_lib;D:\Documents\Code\libs\x86;.\libs;D:\Documents\Code\luabind\luabind-0.9.1\stage;D:\Documents\Code\lua\lua-5.1.5_Win32_dll14_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>luabindd.lib;lua5.1.lib;Logger.lib;SOIL.lib;fmod_vc.lib;fmodL_vc.lib;fmodstudio_vc.lib;fmodstudioL_vc.lib;opengl32.lib;glew32.lib;SDL2main.lib;SDL2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\0;C:\0\boost_1_63_0\boost_1_63_0;C:\0\lua-5.1.5_Win32_dll14_lib\include;C:\0\luabind-0.9.1;C:\net_result\include;C:\0\GL;C:\0\SDL2;D:\Documents\Code\boost\boost_1_63_0\include\boost-1_63;D:\Documents\Code\lua\lua-5.1.5_Win32_dll14_lib\include;D:\Documents\Code\luabind\luabind-0.9.1;.\imgui;.\include;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include\GL;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Full</Optimization>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <UndefinePreprocessorDefinitions>_DEBUG</UndefinePreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>luabind.lib;lua5.1.lib;Logger.lib;SOIL.lib;fmod_vc.lib;fmodL_vc.lib;fmodstudio_vc.lib;fmodstudioL_vc.lib;opengl32.lib;glew32.lib;SDL2main.lib;SDL2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\net_result\libs;C:\0\luabind-0.9.1\stage;C:\0\lua-5.1.5_Win32_dll14_lib;D:\Documents\Code\libs\x86;.\libs;D:\Documents\Code\luabind\luabind-0.9.1\stage;D:\Documents\Code\lua\lua-5.1.5_Win32_dll14_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>luabindd.lib;lua5.1.lib;opengl32.lib;glew32.lib;SDL2main.lib;SDL2.lib;opengl32.lib;SDL2main.lib;SDL2.lib;glew32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\net_result\libs;C:\0\luabind-0.9.1\stage;C:\0\lua-5.1.5_Win32_dll14_lib;C:\net_result\libs;C:\0\luabind-0.9.1\stage;C:\0\lua-5.1.5_Win32_dll14_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <AdditionalIncludeDirectories>C:\0;C:\0\boost_1_63_0\boost_1_63_0;C:\0\lua-5.1.5_Win32_dll14_lib\include;C:\0\luabind-0.9.1;C:\net_result\include;C:\0\GL;C:\0\SDL2;C:\0;C:\0\boost_1_63_0\boost_1_63_0;C:\0\lua-5.1.5_Win32_dll14_lib\include;C:\0\luabind-0.9.1;C:\net_result\include;C:\0\GL;C:\0\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <AdditionalDependencies>luabindd.lib;lua5.1.lib;opengl32.lib;glew32.lib;SDL2main.lib;SDL2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\net_result\libs;C:\0\luabind-0.9.1\stage;C:\0\lua-5.1.5_Win32_dll14_lib;F:\DigiPen\2016-17\GAM200\net_result\libs;D:\Documents\Code\luabind\luabind-0.9.1\stage;D:\Documents\Code\lua\lua-5.1.5_Win32_dll14_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\0;C:\0\boost_1_63_0\boost_1_63_0;C:\0\lua-5.1.5_Win32_dll14_lib\include;C:\0\luabind-0.9.1;C:\net_result\include;C:\0\GL;C:\0\SDL2;D:\Documents\Code\boost\boost_1_63_0\include\boost-1_63;D:\Documents\Code\lua\lua-5.1.5_Win32_dll14_lib\include;D:\Documents\Code\luabind\luabind-0.9.1;F:\DigiPen\2016-17\GAM200\net_result\include;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include\GL;C:\Program Files %28x86%29\Microsoft Visual Studio 14.0\VC\include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level4</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

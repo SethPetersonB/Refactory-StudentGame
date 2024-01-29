@@ -1,0 +1,369 @@
+// Primary Author : Dylan Weber
+// 
+// Co-authors:
+//    Philip Nygard (LoseInit)
+//
+//© Copyright 1996-2016, DigiPen Institute of Technology (USA). All rights reserved.
+// ---------------------------------------------------------------------------------
+#include "../include/StageInit.h"
+#include "../include/Messages.h"
+#include "../include/Input.h"
+#include "../include/MenuButtons.h"
+#include "../include/Waves.h"
+#include "../include/Controller.h"
+#include "../include/audio_startup.h"
+#include "../include/WaveLoader.h"
+
+namespace Engine
+{
+
+  namespace StageInit
+  {
+    /****************************************************************************/
+    /*!
+    \brief
+    Messaging event that is sent on loss to display lose screen
+
+    \param stage
+    The lose stage to set running
+
+    \param payload
+    The data of message
+    */
+    /****************************************************************************/
+    static void OnLoseStage(Stage * stage, const Packet & payload)
+    {
+      stage->setStageRunning(payload.getData<bool>());
+    }
+
+    static void OnWinStage(Stage * stage, const Packet & payload)
+    {
+      stage->setStageRunning(payload.getData<bool>());
+    }
+    /****************************************************************************/
+    /*!
+    \briefOnLoseGame
+    Messaging event that is sent on loss to pause main stage
+
+    \param stage
+    The main stage to pause
+
+    \param payload
+    The data of message
+    */
+    /****************************************************************************/
+    static void OnLoseGame(Stage * stage, const Packet & payload)
+    {
+      stage->setStageRunning(!payload.getData<bool>());
+      //Sound cues
+      int channelFound;
+      channelFound = GetAudioEngine()->FindSoundChannel("menumelody_repeat.wav");
+      GetAudioEngine()->SetChannelPause(channelFound, true);
+      //Determine whether player has lost or won.
+      GameInstance* pc = stage->getMessenger().Request<GameInstance *>("PlayerController");
+      Controller* control = dynamic_cast<Controller*>(pc->getComponent("Controller"));
+      if ( control->isLost() )
+      {
+        channelFound = GetAudioEngine()->FindSoundChannel("losetheme2.wav");
+        if ( channelFound == -1)
+        {
+          GetAudioEngine()->PlaySounds("losetheme2.wav", Vector3(), 0);
+          channelFound = GetAudioEngine()->FindSoundChannel("menumelody_repeat.wav");
+          if ( channelFound != -1 )
+          {
+            GetAudioEngine()->StopChannel(channelFound);
+          }
+        }
+      }
+      if ( control->getHP() > 0 )
+      {
+        control->setWon( true );
+      }
+      if ( control->isWon() )
+      {
+        channelFound = GetAudioEngine()->FindSoundChannel("level_complete.wav");
+        if (channelFound == -1)
+        {
+          GetAudioEngine()->PlaySounds("level_complete.wav", Vector3(), 5);
+          channelFound = GetAudioEngine()->FindSoundChannel("menumelody_repeat.wav");
+          if ( channelFound != -1 )
+          {
+            GetAudioEngine()->StopChannel(channelFound);
+          }
+        }
+      }
+      //END OF SOUND CUES
+    }
+
+    /****************************************************************************/
+    /*!
+    \brief
+    Messaging event that is sent on when reset button is pressed
+
+    \param button
+    The reset button
+
+    \param gameStage
+    The game stage to reset
+
+    \param payload
+    The data of the message
+    */
+    /****************************************************************************/
+    static void OnResetButtonClicked(GameInstance * button, Stage * gameStage, const Packet & payload)
+    {
+      button->getStage()->setStageRunning(false);
+
+      gameStage->setStageReset(true);
+
+      //Reset win/lose conditions.
+      GameInstance* pc = gameStage->getMessenger().Request<GameInstance *>("PlayerController");
+      Controller* control = dynamic_cast<Controller*>(pc->getComponent("Controller"));
+      control->setWon( false );
+      control->setLost( false );
+
+      int nChannelId = GetAudioEngine()->FindSoundChannel("menumelody_repeat.wav");
+      if ( nChannelId != -1 )
+      {
+        GetAudioEngine()->StopChannel(nChannelId);
+      }
+      GetAudioEngine()->PlaySounds("menumelody_repeat.wav", Vector3(), -15.0f);
+    }
+
+    /****************************************************************************/
+    /*!
+    \brief
+    Initializes data for the lose stage
+
+    \param lose
+    The lose stage
+
+    */
+    /****************************************************************************/
+    void LoseInit(Stage * lose)
+    {
+      Stage & gameStage = Stage::GetStage("TestStage1");
+      // add objects to lose screen
+
+      GameInstance & menu = lose->getFirstInstanceByName("HorizontalMenu");
+
+      GameInstance & resetButton = lose->getFirstInstanceByName("ResetButton");
+      using namespace std::placeholders;
+
+      // subscribe to messages
+      SUBSCRIBER_ACTION loseFunc = std::bind(OnLoseStage, lose, std::placeholders::_1);
+      SUBSCRIBER_ACTION reset = std::bind(OnResetButtonClicked, &resetButton, &gameStage, std::placeholders::_1);
+
+      lose->getMessenger().Subscribe(GSM::get().getMessenger(), "Lose", loseFunc);
+      resetButton.getMessenger().Subscribe(resetButton.getMessenger(), "Clicked", reset);
+
+      menu.PostMessage("AddButton", resetButton.getId());
+      lose->setStageRunning(false);
+
+      //GSM::get().getMessenger().Post("Lose", true);
+    }
+
+    void WinInit(Stage * win)
+    {
+      Stage & gameStage = Stage::GetStage("TestStage1");
+      // add objects to lose screen
+
+      GameInstance & menu = win->getFirstInstanceByName("HorizontalMenu");
+
+      GameInstance & resetButton = win->getFirstInstanceByName("ResetButton");
+      using namespace std::placeholders;
+
+      // subscribe to messages
+      SUBSCRIBER_ACTION loseFunc = std::bind(OnWinStage, win, std::placeholders::_1);
+      SUBSCRIBER_ACTION reset = std::bind(OnResetButtonClicked, &resetButton, &gameStage, std::placeholders::_1);
+
+      win->getMessenger().Subscribe(GSM::get().getMessenger(), "Win", loseFunc);
+      resetButton.getMessenger().Subscribe(resetButton.getMessenger(), "Clicked", reset);
+
+      menu.PostMessage("AddButton", resetButton.getId());
+      win->setStageRunning(false);
+
+      //GSM::get().getMessenger().Post("Win", true);
+    }
+
+    /****************************************************************************/
+    /*!
+    \brief
+    Initializes data for the quit stage
+
+    \param quitStage
+    The quit stage
+
+    */
+    /****************************************************************************/
+    void  QuitInit(Stage * quitStage)
+    {
+      GameInstance & menu = quitStage->getFirstInstanceByName("HorizontalMenu");
+
+      Stage & pauseManu = Stage::GetStage("TestMenu1");
+      Stage & gameStage = Stage::GetStage("TestStage1");
+
+      // Set up button connections
+      // yes button on quit screen
+      GameInstance& yes = quitStage->getFirstInstanceByName("Yesbutton");
+      SUBSCRIBER_ACTION y = std::bind(MenuButtons::ButtonClickedEvent, &yes, quitStage, quitStage, std::placeholders::_1);
+      SUBSCRIBER_ACTION invis_y = std::bind(MenuButtons::InvisibleEvent, &yes, Message<bool>(gameStage.isStageRunning()));
+      yes.getMessenger().Subscribe(yes.getMessenger(), "Clicked", y);
+      yes.getMessenger().Subscribe(gameStage.getMessenger(), "STAGE_PAUSED", invis_y);
+
+      // no button on quit screen
+      GameInstance& no = quitStage->getFirstInstanceByName("Nobutton");
+      SUBSCRIBER_ACTION n = std::bind(MenuButtons::ButtonClickedEvent, &no, quitStage, &pauseManu, std::placeholders::_1);
+      SUBSCRIBER_ACTION invis_n = std::bind(MenuButtons::InvisibleEvent, &no, Message<bool>(gameStage.isStageRunning()));
+      no.getMessenger().Subscribe(no.getMessenger(), "Clicked", n);
+      no.getMessenger().Subscribe(gameStage.getMessenger(), "STAGE_PAUSED", invis_n);
+
+      menu.PostMessage("AddButton", yes.getId());
+      menu.PostMessage("AddButton", no.getId());
+
+      quitStage->setStageRunning(false);
+
+    }
+
+    /****************************************************************************/
+    /*!
+    \brief
+    Initializes data for the pause stage
+
+    \param pause
+    The pause stage
+
+    */
+    /****************************************************************************/
+    void PauseInit(Stage * pause)
+    {
+      Stage& gameStage = Stage::GetStage("TestStage1");
+      Stage & quitStage = Stage::GetStage("QuitStage");
+      Stage & howToPlay = Stage::GetStage("HowToPlay");
+
+      GameInstance & menu = pause->getFirstInstanceByName("VerticalMenu");
+      // resume game button
+
+      GameInstance& resumeButton = pause->getFirstInstanceByName("Resumegame");
+      SUBSCRIBER_ACTION resume = std::bind(MenuButtons::ButtonClickedEvent, &resumeButton, pause, &gameStage, std::placeholders::_1);
+      resumeButton.getMessenger().Subscribe(resumeButton.getMessenger(), "Clicked", resume);
+
+      // quit game button
+      GameInstance& quitButton = pause->getFirstInstanceByName("Quitgame");
+      SUBSCRIBER_ACTION quit = std::bind(MenuButtons::ButtonClickedEvent, &quitButton, pause, &quitStage, std::placeholders::_1);
+      quitButton.getMessenger().Subscribe(quitButton.getMessenger(), "Clicked", quit);
+
+
+      // how to play button
+      GameInstance& helpButton = pause->getFirstInstanceByName("Howtoplaybutton");
+      SUBSCRIBER_ACTION help = std::bind(MenuButtons::ButtonClickedEvent, &helpButton, pause, &howToPlay, std::placeholders::_1);
+      helpButton.getMessenger().Subscribe(helpButton.getMessenger(), "Clicked", help);
+
+      menu.PostMessage("AddButton", resumeButton.getId());
+      menu.PostMessage("AddButton", helpButton.getId());
+      menu.PostMessage("AddButton", quitButton.getId());
+
+      pause->setStageRunning(false);
+    }
+
+    /****************************************************************************/
+    /*!
+    \brief
+    Initializes data for the help stage
+
+    \param help
+    The help stage
+
+    */
+    /****************************************************************************/
+    void HelpInit(Stage * help)
+    {
+      help->setStageRunning(false);
+
+    }
+
+    /****************************************************************************/
+    /*!
+    \brief
+    Initializes data for the splash stage
+
+    \param splash
+    The splash stage
+
+    */
+    /****************************************************************************/
+    void SplashInit(Stage * splash)
+    {
+
+      GameInstance& logo = splash->getFirstInstanceByName("SplashScreen");
+      SUBSCRIBER_ACTION logo_invis = std::bind(MenuButtons::InvisibleEvent, &logo, Message<bool>(splash->isStageRunning()));
+      logo.getMessenger().Subscribe(splash->getMessenger(), "STAGE_PAUSED", logo_invis);
+
+    }
+
+    /****************************************************************************/
+    /*!
+    \brief
+    Initializes data for the game stage
+
+    \param game
+    The game stage
+
+    */
+    /****************************************************************************/
+    void GameStageInit(Stage* game)
+    {
+
+      GameInstance & pc = game->getFirstInstanceByName("PlayerController");
+      game->getFirstInstanceByName("Background").getMessenger().Unsubscribe(game->getMessenger(), "STAGE_PAUSED");
+      GameInstance & HP = game->getFirstInstanceByName("HealthUI");
+      GameInstance & RES = game->getFirstInstanceByName("ResourceUI");
+      GameInstance & PRO = game->getFirstInstanceByName("ProgressUI");
+      GameInstance & waveText = game->getFirstInstanceByName("WaveText");
+      GameInstance & waveCount = game->getFirstInstanceByName("WaveCount");
+      GameInstance & wavCont = game->getFirstInstanceByName("WaveController");
+      GameInstance & beginTxt = game->getFirstInstanceByName("SpaceBegin");
+
+      WaveLoader load{ "Waves/L1Waves.json" };
+
+      for (size_t waveNum = 0; waveNum < load.size(); waveNum++)
+      {
+        Wave & wave = load.getWave(waveNum);
+
+        wavCont.PostMessage("AddWave", &wave);
+      }
+
+      using namespace std::placeholders;
+
+      SUBSCRIBER_ACTION loseFunc = std::bind(OnLoseGame, game, std::placeholders::_1);
+      game->getMessenger().Subscribe(GSM::get().getMessenger(), "Lose", loseFunc);
+      game->getMessenger().Subscribe(GSM::get().getMessenger(), "Win", loseFunc);
+
+      pc.PostMessage("SetHPCounter", HP.getId());
+      pc.PostMessage("SetResourceCounter", RES.getId());
+      pc.PostMessage("SetProgressCounter", PRO.getId());
+      pc.PostMessage("SetWaveText", waveText.getId());
+      pc.PostMessage("SetWaveCounter", waveCount.getId());
+      pc.PostMessage("SetWaveBeginText", beginTxt.getId());
+
+     /* Grid& grid_ = GSM::get().getGrid();
+      Grid grid;
+      grid_ = grid;
+      int gridX = 10;
+      int gridY = 10;
+      grid_.SetGridDimensions(gridX, gridY);
+      grid_.SetMaxBuildHeight(100);
+      DrawTiles(grid_);
+
+      game->setStageRunning(true);*/
+
+      Grid grid(game, 10, 10);
+      game->SetGrid(grid);
+      game->GetGrid().DrawGrid();
+
+      game->GetGrid().LoadStructureData("Objects/Structures.json");
+
+      // Load lua sandbox environment
+    }
+  }
+}

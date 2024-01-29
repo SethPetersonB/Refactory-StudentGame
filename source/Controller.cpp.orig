@@ -1,0 +1,1204 @@
+﻿// Primary Author : Dylan Weber
+//
+//� Copyright 1996-2016, DigiPen Institute of Technology (USA). All rights reserved.
+// ---------------------------------------------------------------------------------
+#include "../include/Controller.h"
+#include "../include/display.h"
+#include "../include/GSM.h"
+#include "../include/grid.h"
+#include "../include/audio_startup.h"
+#include "../include/BuildLogic.h"
+#include <cstdlib> // rand
+#include <luabind/luabind.hpp>
+
+#include "../include/MenuButtons.h"
+
+namespace Engine
+{
+  using namespace Logger;
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Function called to reset the game.
+
+  */
+  /****************************************************************************/
+  void Controller::Reset()
+  {
+    Stage & testStage = Stage::GetStage("TestStage1");
+    testStage.setStageReset(true);
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Checks if godmode is active
+
+  \return
+  If godmode is activated
+
+  */
+  /****************************************************************************/
+  bool Controller::IsGod() const
+  {
+    return godMode_;
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+   Retrieves data on if an object is in god mode
+  
+  \param comp
+   The component to check
+
+   \param data
+   The value of godmode
+
+  */
+  /****************************************************************************/
+  static void GetGodMode(const Controller * comp, Packet & data)
+  {
+    static_cast<Message<bool> &>(data).data = comp->IsGod();
+  }
+ 
+
+  void Controller::setGod(bool state)
+  {
+    godMode_ = state;
+    unsigned long res = GetResourceCountID();
+    unsigned long hp = GetHPCountID();
+
+    // Toggle HP visibility
+    try
+    {
+      GameInstance & obj = getParent().getStage()->getInstanceFromID(hp);
+      obj.RequestData<DrawToken>("Graphic").setVisible(!IsGod());
+    }
+    catch (const std::out_of_range &) {}
+
+    // Toggle resource visibility
+    try
+    {
+      GameInstance & obj = getParent().getStage()->getInstanceFromID(res);
+      obj.RequestData<DrawToken>("Graphic").setVisible(!IsGod());
+    }
+    catch (const std::out_of_range &) {}
+  }
+
+  OBJECT_BY_TILE_LIST* Controller::getBlocksAtTileList()
+  {
+    return &BlocksAtTileList;
+  }
+
+  STRUCT_LIST * Controller::getParsedStructs()
+  {
+    return &LoadedStructureList;
+  }
+
+  void Controller::LSLRequest(Packet & data)
+  {
+    data.setData(getParsedStructs());
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Gets the coordinates of a tile
+
+  \param tile
+  The tile to get
+
+  \param data
+  The data to hold the position
+
+  */
+  /****************************************************************************/
+  void GetTileXY(const Tile * tile, Packet & data)
+  {
+    static_cast<Message<glm::vec2> &>(data).data = tile->GetXY();
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+   Checks for keyboard and mouse input and reacts to it.
+
+  */
+  /****************************************************************************/
+  void Controller::UpdateInput()
+  {
+    glm::vec2 add; // position of camera to add if rotated
+    float dt = GSM::get().getDisplay().GetFrameTime(); // frame time
+
+    if (InputSystem::KeyPressed(SDL_SCANCODE_F4)) // close application
+    {
+      GSM::get().getMessenger().Post("GSM_END", Message<std::string>("F4 pressed "));
+
+    }
+
+    // Set the game stage to paused and unpause the pause menu stage
+    if (InputSystem::KeyPressed(SDL_SCANCODE_ESCAPE)) // pause
+    {
+      Stage& quitStage = Stage::GetStage("QuitStage");
+      Stage& howStage = Stage::GetStage("HowToPlay");
+      Stage& pauseMenu = Stage::GetStage("TestMenu1");
+      // cycle through pause menus
+      if (howStage.isStageRunning())
+      {
+        howStage.setStageRunning(false);
+        pauseMenu.setStageRunning(true);
+#if 0
+        /* Reduce main loop sound when in pause menu. */
+#endif
+      }
+      else if (quitStage.isStageRunning())
+      {
+        quitStage.setStageRunning(false);
+        pauseMenu.setStageRunning(true);
+      }
+      else
+      {
+        bool state = getParent().getStage()->isStageRunning();
+        pauseMenu.setStageRunning(state);
+        if ( state )
+        {
+          // Get quieter when entering pause.
+          if (!isVisitedPause())
+          {
+            int nChannelId = GetAudioEngine()->FindSoundChannel("menumelody_repeat.wav");
+            float fVolumedB = GetAudioEngine()->GetChannelVolume(nChannelId);
+            GetAudioEngine()->SetChannelVolume(nChannelId, fVolumedB - 15.0f);
+            setVisitedPause(true);
+          }
+        }
+        if ( !state )
+        {
+          // Get louder when leaving pause.
+          if ( isVisitedPause() )
+          {
+            int nChannelId = GetAudioEngine()->FindSoundChannel("menumelody_repeat.wav");
+            float fVolumedB = GetAudioEngine()->GetChannelVolume(nChannelId);
+            GetAudioEngine()->SetChannelVolume(nChannelId, fVolumedB + 15.0f);
+            setVisitedPause(false);
+          }
+        }
+        getParent().getStage()->setStageRunning(!state);
+      }
+    }
+    if (getParent().getStage()->isStageRunning()) // if game is not paused
+    {
+      // Toggles autoplay
+      //if (InputSystem::KeyPressed(SDL_SCANCODE_F6))
+      //{
+      //  getParent().PostMessage("ToggleAuto", Message<bool>(true));
+      //}
+
+      if (InputSystem::KeyPressed(SDL_SCANCODE_L) && InputSystem::KeyDown(SDL_SCANCODE_LSHIFT)) // lose game 
+      {
+        lost_ = true;
+        GSM::get().getMessenger().Post("Lose", true);
+      }
+
+      if (InputSystem::KeyPressed(SDL_SCANCODE_W) && InputSystem::KeyDown(SDL_SCANCODE_LSHIFT)) // lose game 
+      {
+        won_ = true;
+        GSM::get().getMessenger().Post("Win", true);
+      }
+
+      // Reset game
+      if (InputSystem::KeyPressed(SDL_SCANCODE_F7))
+        Reset();
+
+      //if (InputSystem::KeyPressed(SDL_SCANCODE_F8)) // decrement health
+      //  --health_;
+
+      //if (InputSystem::KeyPressed(SDL_SCANCODE_F9))
+      //getParent().PostMessage("DeleteWall", Message<GameInstance&>(getParent().getStage()->getInstanceFromID(ID_[0].z)));
+
+      // Toggles god mode
+
+      // Scroll in and out
+      //if (InputSystem::MouseScrolled())
+     // {
+     //   GSM::get().getCamera().Zoom(-1.5f * InputSystem::MouseScrolled());
+     // }
+
+      // Move the camera up and down
+      /*if (InputSystem::KeyDown(SDL_SCANCODE_W) || InputSystem::KeyDown(SDL_SCANCODE_UP))
+      {
+        add.y += 150 * dt;
+      }
+      if (InputSystem::KeyDown(SDL_SCANCODE_S) || InputSystem::KeyDown(SDL_SCANCODE_DOWN))
+      {
+        add.y += -150 * dt;
+      }
+
+      //Rotate the camera
+      if (InputSystem::KeyPressed(SDL_SCANCODE_Q))
+      {
+        GFXPipe::get().SetLerpIsometric(glm::pi<float>() / 2, glm::pi<float>() * 2);
+      }
+      if (InputSystem::KeyPressed(SDL_SCANCODE_E))
+      {
+        GFXPipe::get().SetLerpIsometric(-glm::pi<float>() / 2, glm::pi<float>() * 2);
+      }
+
+      // Move the camerea left and right
+      if (InputSystem::KeyDown(SDL_SCANCODE_A) || InputSystem::KeyDown(SDL_SCANCODE_LEFT))
+      {
+        add.x += -150 * dt;
+      }
+      if (InputSystem::KeyDown(SDL_SCANCODE_D) || InputSystem::KeyDown(SDL_SCANCODE_RIGHT))
+      {
+        add.x += 150 * dt;
+      }*/
+
+      if (InputSystem::KeyPressed(SDL_SCANCODE_0))
+      {
+        getParent().getStage()->getMessenger().Post("SetWave", waveNum_ + 1);
+      }
+
+      if (InputSystem::KeyPressed(SDL_SCANCODE_SPACE))
+      {
+        Begin();
+      }
+
+      // Apply camera translation
+      if (add != glm::vec2(0, 0))
+      {
+        Camera & cam = GSM::get().getCamera();
+        glm::vec2 pos = cam.getPosition();
+
+        cam.setPosition(glm::vec2(pos.x + add.x, pos.y + add.y));
+      }
+    }
+  }
+
+ 
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Controller constructor
+
+  \param owner
+  The game instance that owns this component
+
+  */
+  /****************************************************************************/
+  Controller::Controller(GameInstance* owner) : Component(owner, "Controller") ,
+    health_(5), walls_available_(5), godMode_(false), autoplay_(false), 
+    healthId_(0), ammoId_(0), progressId_(0), waveId_(0), waveTextId_(0), waveNum_(0), waveCount_(3)
+  {
+    positions_.clear();
+    ID_.clear();
+
+    UpdateCount();
+    regen_timer_.Reset();
+
+    regen_timer_.Pause();
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Controller constructor that uses the json file
+
+  \param owner
+  The game instance that owns this component
+
+  \param obj
+  The parsed object reference
+
+  */
+  /****************************************************************************/
+  Controller::Controller(GameInstance* owner, const ParsedObject & obj) : Component(owner, "Controller"),
+    health_(obj.getComponentProperty<unsigned>("Controller", "hp")), 
+    walls_available_(obj.getComponentProperty<unsigned>("Controller", "walls")),
+    godMode_(obj.getComponentProperty<bool>("Controller", "god")), autoplay_(false),
+    healthId_(0), ammoId_(0), progressId_(0), waveId_(0), waveTextId_(0), waveNum_(0), waveCount_(3),
+    wavesRunning_(false)
+  {
+    UpdateCount();
+    regen_timer_.Reset();
+
+    if (!owner->getStage()->isStageRunning())
+      regen_timer_.Pause();
+    else
+      regen_timer_.UnPause();
+  }
+
+  void Controller::Begin()
+  {
+    if(!wavesRunning_)
+      getParent().getStage()->getMessenger().Post("PauseWave", false);
+
+    try
+    {
+      GameInstance & obj = getParent().getStage()->getInstanceFromID(beginId_);
+
+      DrawToken item = obj.RequestData<DrawToken>("Graphic");
+
+      item.setVisible(false);
+    }
+    catch (const std::out_of_range &)
+    {}
+
+    wavesRunning_ = true;
+    regen_timer_.Reset();
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Getter
+
+  \return 
+  A private member variable
+  */
+  /****************************************************************************/
+  int Controller::getHP() const
+  {
+    return health_;
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Getter
+
+  \return
+  A private member variable
+  */
+  /****************************************************************************/
+  int Controller::getWallsAvailable() const
+  {
+    return walls_available_;
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Getter
+
+  \return
+  A private member variable
+  */
+  /****************************************************************************/
+  std::vector<glm::vec3>& Controller::getPosition()
+  {
+    return positions_;
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Getter
+
+  \return
+  A private member variable
+  */
+  /****************************************************************************/
+  std::vector<glm::vec3>& Controller::getID()
+  {
+    return ID_;
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Getter
+
+  \return
+  A private member variable
+  */
+  /****************************************************************************/
+  Timer& Controller::getRegenTimer()
+  {
+    return regen_timer_;
+  }
+
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Getter
+
+  \return
+  A private member variable
+  */
+  /****************************************************************************/
+  bool Controller::getAuto() const
+  {
+    return autoplay_;
+  }
+
+  
+  /****************************************************************************/
+  /*!
+  \brief
+  Setters that modify a variable
+  */
+  /****************************************************************************/
+  void Controller::toggleAuto()
+  {
+    autoplay_ = !autoplay_;
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Setters that modify a variable
+
+  */
+  /****************************************************************************/
+  void Controller::setHP(int hp)
+  {
+    health_ = hp;
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Setters that modify a variable
+
+  */
+  /****************************************************************************/
+  void Controller::setWallsAvailable(int walls)
+  {
+    walls_available_ = walls;
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Setters that modify a variable
+
+  */
+  /****************************************************************************/
+  void Controller::takeDamage(int dmg)
+  {
+    if(!IsGod())
+      health_ -= dmg;
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Setters that modify a variable
+
+  */
+  /****************************************************************************/
+  void Controller::placeWall()
+  {
+    if (!godMode_)
+      --walls_available_;
+
+    UpdateCount();
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Updates the number of available blocks displayed on the HUD
+
+  */
+  /****************************************************************************/
+  void Controller::UpdateCount()
+  {
+    try
+    {
+      // get HUD element instance
+      GameInstance & resCount = getParent().getStage()->getInstanceFromID(ammoId_);
+      // switch texture frames based on walls available
+      resCount.PostMessage("TextureFrameSet", Message<unsigned>((walls_available_ <= 16) ? walls_available_ : 16));
+      DrawToken p = resCount.RequestData<DrawToken>("Graphic");
+      static glm::vec4 orig_color = p.getShade(); // original color
+      static Timer timer;
+	  static int blinks = 0;
+      if (walls_available_ <= 0)
+      {
+        glm::vec4 color = p.getShade();
+        if (timer.ElapsedTime() > 0.0625)
+        {
+          if (color == glm::vec4(0,0,0,0) && blinks < 3)
+          {
+<<<<<<< HEAD
+            p.setShade(glm::vec4{ .75, 0, 0, .75 }); // make it red if no resources left
+=======
+            p.setShade(glm::vec4{ 1, 0, 0, 0.5 }); // make it red if no resources left
+>>>>>>> c6becf2310cb22bb0c11f89a61c91bed355c87eb
+            timer.Reset();
+			++blinks;
+          }
+          else
+          {
+            p.setShade(glm::vec4(0, 0, 0, 0));
+            timer.Reset();
+          }
+        }
+      }
+      else
+	  {
+        p.setShade(orig_color);
+		  blinks = 0;
+	  }
+      
+    }
+    catch (const std::out_of_range &)
+    {
+      Log<Warning>("No valid resource counter set up on [%s:%u]", getParent().getObjectType().c_str(), getParent().getId());
+    }
+
+    try
+    {
+      GameInstance & hpCount = getParent().getStage()->getInstanceFromID(healthId_);
+      unsigned hpFrame;
+
+      hpFrame = health_;
+
+      hpCount.PostMessage("TextureFrameSet", hpFrame);
+    }
+    catch (const std::out_of_range &)
+    {
+      Log<Warning>("No valid progress hud element up on [%s:%u]", getParent().getObjectType().c_str(), getParent().getId());
+    }
+    try
+    {
+      GameInstance & proCount = getParent().getStage()->getInstanceFromID(progressId_);
+
+      DrawToken p = proCount.RequestData<DrawToken>("Graphic");
+        float numEnemies = getParent().getStage()->getMessenger().Request<size_t>("EnemiesDown") - 1;
+        float totalEnemies = getParent().getStage()->getMessenger().Request<size_t>("TotalEnemies") - 1;
+		if (numEnemies > totalEnemies)
+		{
+			numEnemies = totalEnemies;
+		}
+		else
+		{
+                  p.setScale(glm::vec2{ 2 * (1 - (numEnemies / totalEnemies)), 1.16 * (1 - (numEnemies / totalEnemies))}); // increase width over time
+		}
+
+    }
+    catch (const std::out_of_range &)
+    {
+      Log<Warning>("No valid progress counter set up on [%s:%u]", getParent().getObjectType().c_str(), getParent().getId());
+    }
+  }
+
+  void Controller::setWaveNumber(size_t wave)
+  {
+    waveNum_ = wave;
+
+    if (waveNum_ > waveCount_)
+      GSM::get().getMessenger().Post("Win", true);
+
+    try
+    {
+      GameInstance & waveCount = getParent().getStage()->getInstanceFromID(waveId_);
+
+      waveCount.PostMessage("TextureFrameSet", wave + 1);
+    }
+    catch (const std::out_of_range &)
+    {
+      Log<Warning>("[%s:%u] No wave counter set up", getParent().getObjectType().c_str(), getParent().getId());
+    }
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message functions to set a variable
+
+  \param sub
+  The controller that is subscribing to this
+
+  \param payload
+  The data to set
+
+  */
+  /****************************************************************************/
+  static void OnHPCounterSet(Controller * sub, const Packet & payload)
+  {
+    sub->SetHealthID(payload.getData<unsigned long>());
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message functions to set a variable
+
+  \param sub
+  The controller that is subscribing to this
+
+  \param payload
+  The data to set
+
+  */
+  /****************************************************************************/
+  static void OnProgressCounterSet(Controller * sub, const Packet & payload)
+  {
+    sub->SetProgressID(payload.getData<unsigned long>());
+  }
+
+  static void OnMenuIDSet(Controller * sub, std::function<void(Controller *, unsigned long)> func, const Packet & payload)
+  {
+    func(sub, payload.getData<unsigned long>());
+  }
+
+  void Controller::onWaveChanged(const Packet & payload)
+  {
+    setWaveNumber(payload.getData<unsigned>());
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message functions to set a variable
+
+  \param sub
+  The controller that is subscribing to this
+
+  \param payload
+  The data to set
+
+  */
+  /****************************************************************************/
+  static void HPIDRequest(const Controller * sub, Packet & data)
+  {
+    data.setData(sub->GetHPCountID());
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message functions to set a variable
+
+  \param sub
+  The controller that is subscribing to this
+
+  \param payload
+  The data to set
+
+  */
+  /****************************************************************************/
+  static void OnResourceCounterSet(Controller * sub, const Packet & payload)
+  {
+    sub->SetResourceID(payload.getData<unsigned long>());
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message functions to set a variable
+
+  \param sub
+  The controller that is subscribing to this
+
+  \param payload
+  The data to set
+
+  */
+  /****************************************************************************/
+  static void ResourceIDRequest(const Controller * sub, Packet & data)
+  {
+    data.setData(sub->GetResourceCountID());
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Event
+
+  \param payload
+  Data of message
+
+  */
+  /****************************************************************************/
+  void Controller::LoseEvent(const Packet& payload)
+  {
+    Stage& testStage = Stage::GetStage("TestStage1");
+    testStage.setStageRunning(false);
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Event
+
+  \param payload
+  Data of message
+
+  */
+  /****************************************************************************/
+  void Controller::autoPlayEvent(const Packet& payload)
+  {
+    autoPlay();
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Event
+
+  \param payload
+  Data of message
+
+  */
+  /****************************************************************************/
+  void Controller::onToggleAuto(const Packet& payload)
+  {
+    toggleAuto();
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Event
+
+  \param payload
+  Data of message
+
+  */
+  /****************************************************************************/
+  void Controller::onSetHP(const Packet& payload)
+  {
+    int hp = dynamic_cast<const Message<int>*>(&payload)->data;
+    setHP(hp);
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Event
+
+  \param payload
+  Data of message
+
+  */
+  /****************************************************************************/
+  void Controller::onSetWalls(const Packet& payload)
+  {
+    int walls = dynamic_cast<const Message<int>*>(&payload)->data;
+    setWallsAvailable(walls);
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Event
+
+  \param payload
+  Data of message
+
+  */
+  /****************************************************************************/
+  void Controller::onTakeDamage(const Packet& payload)
+  {
+      int dmg = dynamic_cast<const Message<int>*>(&payload)->data;
+      takeDamage(dmg);  
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Event
+
+  \param payload
+  Data of message
+
+  */
+  /****************************************************************************/
+  void Controller::onPlaceWall(const Packet& payload)
+  {
+    placeWall();
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Request
+
+  \param data
+  Data of request
+
+  */
+  /****************************************************************************/
+  void Controller::positionsRequest(Packet& data)
+  {
+    dynamic_cast<Message<std::vector<glm::vec3>*>&>(data).data = &getPosition();
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Request
+
+  \param data
+  Data of request
+
+  */
+  /****************************************************************************/
+  void Controller::IDRequest(Packet& data)
+  {
+    dynamic_cast<Message<std::vector<glm::vec3>*>&>(data).data = &getID();
+  }
+
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Request
+
+  \param data
+  Data of request
+
+  */
+  /****************************************************************************/
+  void Controller::autoRequest(Packet& data)
+  {
+    dynamic_cast<Message<bool>&>(data).data = getAuto();
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Request
+
+  \param data
+  Data of request
+
+  */
+  /****************************************************************************/
+  void Controller::HPRequest(Packet& data)
+  {
+    dynamic_cast<Message<int>&>(data).data = getHP();
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Request
+
+  \param data
+  Data of request
+
+  */
+  /****************************************************************************/
+  void Controller::WallRequest(Packet& data)
+  {
+    dynamic_cast<Message<int>&>(data).data = getWallsAvailable();
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Message Request
+
+  \param data
+  Data of request
+
+  */
+  /****************************************************************************/
+  void Controller::ownerRequest(Packet& data)
+  {
+    dynamic_cast<Message<GameInstance*>&>(data).data = &getParent();
+  }
+
+  void Controller::tilePositionRequest(Packet& data)
+  {
+    dynamic_cast<Message<std::vector<glm::vec2>*>&>(data).data = &getTilePositions();
+  }
+
+  void Controller::tileBlocksRequest(Packet& data)
+  {
+    data.setData(getBlocksAtTileList());
+    //dynamic_cast<Message<OBJECT_BY_TILE_LIST>*>&>(data).data = &getBlocksAtTileList();
+  }
+
+  void Controller::onStagePaused(const Packet & data)
+  {
+    bool paused = data.getData<bool>();
+
+    regen_timer_.Pause();
+  }
+
+
+  void Controller::OnWavePaused(const Packet & payload)
+  {
+    if (!payload.getData<bool>())
+      Begin();
+  }
+  /****************************************************************************/
+  /*!
+  \brief
+  Connects messaging events for controller component
+
+  \param base_sub
+  Component that is subscribing to these events
+
+  */
+  /****************************************************************************/
+  void ControllerHandler::ConnectEvents(Component * base_sub)
+  {
+    Controller* sub = dynamic_cast<Controller*>(base_sub);
+
+    using namespace std::placeholders;
+
+    Messenger& objMessenger = sub->getParent().getMessenger();
+
+    //SUBSCRIBER_ACTION onHPSet = std::bind(&Controller::onSetHP, sub, std::placeholders::_1);
+    //SUBSCRIBER_ACTION onWallSet = std::bind(&Controller::onSetWalls, sub, std::placeholders::_1);
+    //SUBSCRIBER_ACTION onDmg = std::bind(&Controller::onTakeDamage, sub, std::placeholders::_1);
+    SUBSCRIBER_ACTION onPlace = std::bind(&Controller::onPlaceWall, sub, std::placeholders::_1);
+    //SUBSCRIBER_ACTION onToggleGod = std::bind(OnToggleGod, sub, std::placeholders::_1);
+    //SUBSCRIBER_ACTION onAuto = std::bind(&Controller::onToggleAuto, sub, std::placeholders::_1);
+    SUBSCRIBER_ACTION autoPlay = std::bind(&Controller::autoPlayEvent, sub, std::placeholders::_1);
+    SUBSCRIBER_ACTION lose = std::bind(&Controller::LoseEvent, sub, std::placeholders::_1);
+    SUBSCRIBER_ACTION setHPCount = std::bind(OnMenuIDSet, sub, &Controller::SetHealthID, std::placeholders::_1);
+    SUBSCRIBER_ACTION setResCount = std::bind(OnMenuIDSet, sub, &Controller::SetResourceID, std::placeholders::_1);
+    SUBSCRIBER_ACTION setProCount = std::bind(OnMenuIDSet, sub, &Controller::SetProgressID, std::placeholders::_1);
+    SUBSCRIBER_ACTION setBegin = std::bind(OnMenuIDSet, sub, &Controller::SetBeginID, std::placeholders::_1);
+
+    SUBSCRIBER_ACTION setWaveText = std::bind(OnMenuIDSet, sub, &Controller::SetWaveTextID, std::placeholders::_1);
+    SUBSCRIBER_ACTION setWaveCount = std::bind(OnMenuIDSet, sub, &Controller::SetWaveCountID, std::placeholders::_1);
+    SUBSCRIBER_ACTION waveChanged = std::bind(&Controller::onWaveChanged, sub, std::placeholders::_1);
+    SUBSCRIBER_ACTION onStagePaused = std::bind(&Controller::onStagePaused, sub, std::placeholders::_1);
+    SUBSCRIBER_ACTION onBegin = std::bind(&Controller::OnWavePaused, sub, std::placeholders::_1);
+ 
+
+    REQUEST_ACTION requestHP = std::bind(&Controller::HPRequest, sub, std::placeholders::_1);
+    REQUEST_ACTION requestWall = std::bind(&Controller::WallRequest, sub, std::placeholders::_1);
+    REQUEST_ACTION requestOwner = std::bind(&Controller::ownerRequest, sub, std::placeholders::_1);
+    REQUEST_ACTION requestGodStatus = std::bind(GetGodMode, sub, std::placeholders::_1);
+    REQUEST_ACTION requestAuto = std::bind(&Controller::autoRequest, sub, std::placeholders::_1);
+    REQUEST_ACTION requestPosition = std::bind(&Controller::positionsRequest, sub, std::placeholders::_1);
+    REQUEST_ACTION requestID = std::bind(&Controller::IDRequest, sub, std::placeholders::_1);
+    REQUEST_ACTION hpIDReq = std::bind(HPIDRequest, sub, std::placeholders::_1);
+    REQUEST_ACTION resIDReq = std::bind(ResourceIDRequest, sub, std::placeholders::_1);
+    REQUEST_ACTION lslReq = std::bind(&Controller::LSLRequest, sub, std::placeholders::_1);
+    REQUEST_ACTION requestTilePos = std::bind(&Controller::tilePositionRequest, sub, std::placeholders::_1);
+    REQUEST_ACTION reqBlocksOnTile = std::bind(&Controller::tileBlocksRequest, sub, std::placeholders::_1);
+
+    //objMessenger.Subscribe(objMessenger, "SetPlayerHP", onHPSet);         //
+    //objMessenger.Subscribe(objMessenger, "SetAvailableWalls", onWallSet); //
+    //objMessenger.Subscribe(objMessenger, "PlayerTakeDamage", onDmg);      //
+    objMessenger.Subscribe(objMessenger, "PlaceWall", onPlace);
+    //objMessenger.Subscribe(objMessenger, "ToggleGod", onToggleGod);      //
+    //objMessenger.Subscribe(objMessenger, "ToggleAuto", onAuto);          //
+    objMessenger.Subscribe(objMessenger, "AutoPlay", autoPlay);
+    objMessenger.Subscribe(objMessenger, "SetHPCounter", setHPCount);
+    objMessenger.Subscribe(objMessenger, "SetResourceCounter", setResCount);
+    objMessenger.Subscribe(objMessenger, "SetProgressCounter", setProCount);
+    objMessenger.Subscribe(objMessenger, "SetWaveText", setWaveText);
+    objMessenger.Subscribe(objMessenger, "SetWaveCounter", setWaveCount);
+    objMessenger.Subscribe(objMessenger, "SetWaveBeginText", setBegin);
+
+    objMessenger.Subscribe(getStage()->getMessenger(), "CurrentWave", waveChanged);
+    objMessenger.Subscribe(getStage()->getMessenger(), "STAGE_PAUSED", onStagePaused);
+    objMessenger.Subscribe(getStage()->getMessenger(), "Begin", onBegin);
+
+    objMessenger.SetupRequest("PlayerHP", requestHP);
+    objMessenger.SetupRequest("AvailableWalls", requestWall);
+    objMessenger.SetupRequest("IsGod", requestGodStatus);
+    objMessenger.SetupRequest("IsAuto", requestAuto);
+    objMessenger.SetupRequest("PositionVector", requestPosition);
+    objMessenger.SetupRequest("IDVector", requestID);
+    objMessenger.SetupRequest("ResourceCounterID", resIDReq);
+    objMessenger.SetupRequest("HPCounterID", hpIDReq);
+    objMessenger.SetupRequest("GetParsedStructureList", lslReq);
+    objMessenger.SetupRequest("TilePositionVector", requestTilePos);
+    objMessenger.SetupRequest("BlocksOnTile", reqBlocksOnTile);
+
+    Stage* stage = getStage();
+    stage->getMessenger().SetupRequest("PlayerController", requestOwner);
+    stage->getMessenger().Subscribe(GSM::get().getMessenger(), "Lose", lose);
+
+    // Lua events
+    ScriptRouter & router = getStage()->getScriptEventRouter();
+
+    std::vector<std::shared_ptr<ScriptEvent>> events;
+
+    events.push_back(router.newEvent<int>(objMessenger, "SetPlayerHP"));
+    events.push_back(router.newEvent<int>(objMessenger, "SetAvailableWalls"));
+    events.push_back(router.newEvent<int>(objMessenger, "PlayerTakeDamage"));
+
+    events.push_back(router.newEvent<bool>(objMessenger, "ToggleGod"));
+    events.push_back(router.newEvent<bool>(objMessenger, "ToggleAuto"));
+
+    sub->getParent().registerScriptEvent(events);
+
+  }
+
+  void ControllerHandler::getLuaRegisters()
+  {
+    using namespace luabind;
+
+    getStage()->registerLuaModule(
+      class_<Controller, Component>("Controller")
+      .property("hp", &Controller::getHP, &Controller::setHP)
+      .property("walls", &Controller::getWallsAvailable, &Controller::setWallsAvailable)
+      .property("god", &Controller::IsGod, &Controller::setGod)
+      .property("autoplay", &Controller::getAuto, &Controller::setAuto)
+
+      .def("Damage", &Controller::takeDamage)
+    );
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  ControllerHandler constructor
+
+  \param stage
+  Stage of the controller 
+
+  */
+  /****************************************************************************/
+  ControllerHandler::ControllerHandler(Stage* stage) : ComponentHandler(stage, "Controller", false)
+  {
+    dependencies_ = { "Physics", "Transform" };
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Controller update function
+
+  */
+  /****************************************************************************/
+  void ControllerHandler::update()
+  {
+
+    for (auto component : componentList_)
+    {
+      dynamic_cast<Controller*>(component)->UpdateInput();
+
+      if (Stage::GetStage("TestStage1").isStageResetting())
+      {
+        // clear vectors if stage is resetting
+        component->getParent().RequestData<std::vector<glm::vec3>*>("PositionVector")->clear();
+        component->getParent().RequestData<std::vector<glm::vec3>*>("IDVector")->clear();
+        return;
+      }
+      Controller * controller = static_cast<Controller *>(component);
+
+      Timer& regen_timer = controller->getRegenTimer();
+      
+      // add another wall if time elapsed is greater than wall regen rate
+      if (controller->IsWavesRunning() && regen_timer.ElapsedTime() > REGEN_RATE)
+      {
+        int walls = dynamic_cast<Controller*>(component)->getWallsAvailable();
+        if (walls < 16)
+        {
+          dynamic_cast<Controller*>(component)->setWallsAvailable(walls + 1); // give another wall
+          //Play sound cue: SETH PETERSON
+          int i = generate_random_int(0,2); // needs randomness element to it...
+          if ( i == 0)
+          {
+            GetAudioEngine()->PlaySounds("ResourceGained.wav", Vector3(), -30.0f);
+          }
+          else if ( i == 1 )
+          {
+            GetAudioEngine()->PlaySounds("ResourceGained2.wav", Vector3(), -30.0f);
+          }
+          else
+          {
+            GetAudioEngine()->PlaySounds("ResourceGained3.wav", Vector3(), -30.0f);
+          }
+          // END OF SOUND CUE
+        }
+        regen_timer.Reset();
+      }
+
+      dynamic_cast<Controller*>(component)->UpdateCount(); // update UI
+
+      // check if autoplay is active and...autoplay
+      component->getParent().PostMessage("AutoPlay", Message<bool>(true));
+
+
+      /* SETH PETERSON: This will be changed to look for a fraction of player's HP and then do audio stuff with it.
+      if (dynamic_cast<Controller*>(component)->getHP() <= 0 && ! dynamic_cast<Controller*>(component)->isLost())
+      {
+      }
+      */
+
+      if (dynamic_cast<Controller*>(component)->getHP() <= 0 && ! dynamic_cast<Controller*>(component)->isLost())
+      {
+        dynamic_cast<Controller*>(component)->setLost(true);
+        GSM::get().getMessenger().Post("Lose", Message<bool>(true));
+      }
+    }
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Returns whether the player has lost or not.
+
+  */
+  /****************************************************************************/
+  bool Controller::isLost()
+  {
+    return lost_;
+  }
+  bool Controller::isWon()
+  {
+    return won_;
+  }
+  void Controller::setLost(bool result)
+  {
+    lost_ = result;
+  }
+  void Controller::setWon(bool result)
+  {
+    won_ = result;
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Toggles god mode for the controller, giving unlimited resources and HP
+
+  */
+  /****************************************************************************/
+  void Controller::ToggleGodMode()
+  {
+    setGod(!godMode_);
+  }
+
+  /****************************************************************************/
+  /*!
+  \brief
+  Checks if autoplay is enabled and randomly places blocks if it is
+
+  */
+  /****************************************************************************/
+  void Controller::autoPlay()
+  {
+    if (!autoplay_)
+      return;
+
+    if (auto_timer_.ElapsedTime() < 1) // dont be too speedy on block placements
+      return;
+
+    auto_timer_.Reset(); // reset timer
+
+    Stage* stage = getParent().getStage();
+    Grid& grid = stage->GetGrid();
+    int width = grid.GetGridWidth();
+    int height = grid.GetGridHeight();
+
+    // get random tile
+    int x = rand() % width;
+    int y = rand() % height;
+
+    // place random tile
+    GameInstance& tile = stage->getInstanceFromID(grid[x][y]);
+    tile.PostMessage("Clicked", Message<glm::vec2>(glm::vec2()));
+
+  }
+
+}

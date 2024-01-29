@@ -1,0 +1,36 @@
+{
+  // Folder
+  "Structures/": {
+    // Structure name
+    // Structure path
+
+    "BaseStructure": {
+      "path": "DefStructure.strct"
+    },
+    // Alias for the structure
+    "Tower": {
+      // Path to the structure in the containing folder
+      "path": "Tower.struct"
+    },
+	
+	"Pancake": {
+	  "path": "Pancake.strct"
+	},
+	
+	"Castle_Wall": {
+	  "path": "Castle_Wall.strct"
+	},
+
+  "Shock": {
+    "path": "Shock.strct"
+  },
+
+    "Slow": {
+      "path": "Slow.strct"
+    },
+
+    "Shield": {
+      "path":  "Shield.strct"
+    }
+  }
+}

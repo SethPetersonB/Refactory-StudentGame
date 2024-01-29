@@ -1,0 +1,9 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "0.1.0",
+    "command": "clang++",
+    "isShellCommand": true,
+    "args": ["-Wall", "-Wextra", "-ansi", "-pedantic", "-g", "main.cpp", "display.cpp", "mesh.cpp", "object.cpp", "shader.cpp", "texture.cpp", "-lGL", "-lGLEW", "-lSDL2", "-lSOIL"],
+    "showOutput": "always"
+}
